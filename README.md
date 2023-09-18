@@ -23,7 +23,7 @@ There are two joysticks, one joystick does not reset on release while the other 
 ## Usage
 To use the virtual joysticks in your web application, follow these steps:
 
-1. Copy the HTML code from the provided `index.html` file and paste it into your web page where you want the joysticks to appear.
+1. Copy the HTML code from the provided `joystick.html` file and paste it into your web page where you want the joysticks to appear.
 
 2. Customize the styles of the joysticks by modifying the CSS styles defined in the `<style>` section of the HTML. You can change colors, sizes, and positions to match your design preferences.
 
