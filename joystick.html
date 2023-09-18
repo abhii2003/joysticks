@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Joysticks Reconn</title>
+    <style>
+        .joystickstyle1 {
+            display: inline-block;
+            position: absolute;
+            width: 190px;
+            height: 190px;
+            border: 2px solid #f7f7f7;
+            border-radius: 50%;
+            background-color: rgb(207, 225, 255);
+            margin: 10px;
+            top: 65%;
+            left: 50px;
+        }
+
+        .stickstyle1 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 130px;
+            height: 130px;
+            border: 4px solid #f7f7f7;
+            background-color: rgb(92, 163, 255);
+            opacity: 0.2;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .joystickstyle2 {
+            display: inline-block;
+            position: absolute;
+            width: 190px;
+            height: 190px;
+            border: 2px solid #f7f7f7;
+            border-radius: 50%;
+            background-color: rgb(255, 207, 207);
+            margin: 10px;
+            top: 65%;
+            right: 50px;
+        }
+
+        .stickstyle2 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 130px;
+            height: 130px;
+            border: 4px solid #f7f7f7;
+            background-color: rgb(255, 92, 92);
+            opacity: 0.2;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .values {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="joystick joystickstyle1">
+
+        <!-- this is for debugging the code for the values of x and y  -->
+        <div class="values">
+            <label>X: </label><span id="x1">0</span>
+            <br>
+            <label>Y: </label><span id="y1">0</span>
+        </div>
+        <div class="stick stickstyle1"></div>
+    </div>
+
+    <div class="joystick joystickstyle2">
+        <div class="stick stickstyle2"></div>
+        <div class="values ">
+            <!-- this is for debugging the code for the values of x and y  -->
+            <label>X: </label><span id="x2">0</span>
+            <br>
+            <label>Y: </label><span id="y2">0</span>
+        </div>
+    </div>
+
+    <script>
+        var joysticks = document.getElementsByClassName('joystick');
+        var sticks = document.getElementsByClassName('stick');
+        var stickRadius = sticks[0].offsetWidth / 2;
+        var isDragging = false;
+        var positions = [];
+
+        for (var i = 0; i < joysticks.length; i++) {
+            positions.push({
+                x: 0,
+                y: 0
+            });
+            initializeJoystick(i);
+        }
+
+        function initializeJoystick(index) {
+            var joystick = joysticks[index];
+            var stick = sticks[index];
+            var xValue = document.getElementById('x' + (index + 1));
+            var yValue = document.getElementById('y' + (index + 1));
+
+            joystick.addEventListener('mousedown', function (event) {
+                startDragging(event, stick, index);
+            });
+            joystick.addEventListener('touchstart', function (event) {
+                startDragging(event, stick, index);
+            });
+            document.addEventListener('mouseup', function (event) {
+                stopDragging(event, stick, index);
+            });
+            document.addEventListener('touchend', function (event) {
+                stopDragging(event, stick, index);
+            });
+            document.addEventListener('mousemove', function (event) {
+                moveStick(event, stick, xValue, yValue, index);
+            });
+            document.addEventListener('touchmove', function (event) {
+                moveStick(event, stick, xValue, yValue, index);
+            });
+        }
+
+        function startDragging(event, stick, index) {
+            event.preventDefault();
+            isDragging = true;
+            stick.classList.add('active');
+        }
+
+        function stopDragging(event, stick, index) {
+            event.preventDefault();
+            isDragging = false;
+            stick.classList.remove('active');
+            if (index == 1) {
+                resetStickPosition(stick);
+                positions[index].x = 0;
+                positions[index].y = 0;
+                updateValues(positions[index].x, positions[index].y, index);
+            }
+        }
+
+        function moveStick(event, stick, xValue, yValue, index) {
+            event.preventDefault();
+            if (isDragging && stick.classList.contains('active')) {
+                var touch = event.type.startsWith('touch');
+                var point = touch ? event.touches[0] : event;
+                var rect = stick.parentElement.getBoundingClientRect();
+                var posX = point.clientX - rect.left;
+                var posY = point.clientY - rect.top;
+
+                var deltaX = posX - stick.parentElement.offsetWidth / 2;
+                var deltaY = posY - stick.parentElement.offsetHeight / 2;
+                var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                var angle = Math.atan2(deltaY, deltaX);
+
+                if (distance > stickRadius) {
+                    posX = stick.parentElement.offsetWidth / 2 + Math.cos(angle) * stickRadius;
+                    posY = stick.parentElement.offsetHeight / 2 + Math.sin(angle) * stickRadius;
+                }
+
+                stick.style.left = posX + 'px';
+                stick.style.top = posY + 'px';
+
+                var xPercentage = (posX - stickRadius) / (stick.parentElement.offsetWidth - 2 * stickRadius);
+                var yPercentage = (posY - stickRadius) / (stick.parentElement.offsetHeight - 2 * stickRadius);
+                positions[index].x = xPercentage.toFixed(2);
+                positions[index].y = yPercentage.toFixed(2);
+                updateValues(positions[index].x, positions[index].y, index);
+            }
+        }
+
+        function resetStickPosition(stick) {
+            stick.style.left = '50%';
+            stick.style.top = '50%';
+        }
+
+        function updateValues(xValue, yValue, index) {
+            document.getElementById('x' + (index + 1)).textContent = xValue;
+            document.getElementById('y' + (index + 1)).textContent = yValue;
+        }
+    </script>
+</body>
+
+</html>
